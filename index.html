@@ -3,7 +3,7 @@
 <html lang="no">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Sleep Monitor 2.0</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
@@ -13,598 +13,550 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
 :root {
-    --bg: #080b14;
-    --panel: #111827;
-    --panel2: #0d1422;
-    --border: #222d40;
-    --text: #eef2ff;
-    --muted: #8391aa;
-    --purple: #8b5cf6;
-    --blue: #6366f1;
-    --green: #4ade80;
-    --red: #fb7185;
-    --yellow: #fbbf24;
+    --bg:#080b14;
+    --panel:#111827;
+    --panel2:#0d1422;
+    --border:#222d40;
+    --text:#eef2ff;
+    --muted:#8391aa;
+    --purple:#8b5cf6;
+    --blue:#6366f1;
+    --green:#4ade80;
+    --red:#fb7185;
+    --yellow:#fbbf24;
 }
 
-* {
-    box-sizing: border-box;
-}
+* { box-sizing:border-box; }
 
 body {
-    margin: 0;
-    background: var(--bg);
-    color: var(--text);
-    font-family: Inter, sans-serif;
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:Inter,sans-serif;
 }
 
-body::before {
-    content: "";
-    position: fixed;
-    width: 500px;
-    height: 500px;
-    background: #635bff;
-    filter: blur(180px);
-    opacity: .07;
-    top: -200px;
-    right: -100px;
-    pointer-events: none;
-}
-
-button, input {
-    font-family: inherit;
-}
+button,input { font-family:inherit; }
 
 button {
-    cursor: pointer;
-    transition: .2s;
+    cursor:pointer;
+    transition:.2s;
 }
 
 button:disabled {
-    opacity: .5;
-    cursor: not-allowed;
+    opacity:.5;
+    cursor:not-allowed;
 }
 
 .app {
-    max-width: 1250px;
-    padding: 32px 22px;
-    margin: auto;
+    max-width:1250px;
+    padding:32px 22px;
+    margin:auto;
 }
 
-/* HEADER */
-
 header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 20px;
-    margin-bottom: 30px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:20px;
+    margin-bottom:30px;
 }
 
 .brand {
-    display: flex;
-    align-items: center;
-    gap: 14px;
+    display:flex;
+    align-items:center;
+    gap:14px;
 }
 
 .logo {
-    width: 48px;
-    height: 48px;
-    background: linear-gradient(135deg, #6366f1, #a855f7);
-    display: grid;
-    place-items: center;
-    border-radius: 15px;
-    font-size: 23px;
+    width:48px;
+    height:48px;
+    background:linear-gradient(135deg,#6366f1,#a855f7);
+    display:grid;
+    place-items:center;
+    border-radius:15px;
+    font-size:23px;
 }
 
 .brand h1 {
-    font-size: 20px;
-    margin: 0;
-    letter-spacing: -.6px;
+    font-size:20px;
+    margin:0;
+    letter-spacing:-.6px;
 }
 
 .brand p {
-    margin: 5px 0 0;
-    color: var(--muted);
-    font-size: 12px;
+    margin:5px 0 0;
+    color:var(--muted);
+    font-size:12px;
 }
 
 .live-pill {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background: #111a2b;
-    border: 1px solid var(--border);
-    padding: 10px 14px;
-    border-radius: 30px;
-    color: #a8b5cc;
-    font-size: 12px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    background:#111a2b;
+    border:1px solid var(--border);
+    padding:10px 14px;
+    border-radius:30px;
+    color:#a8b5cc;
+    font-size:12px;
 }
 
 .dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: #64748b;
+    width:8px;
+    height:8px;
+    border-radius:50%;
+    background:#64748b;
 }
 
 .dot.active {
-    background: var(--green);
-    box-shadow: 0 0 12px #4ade8080;
+    background:var(--green);
+    box-shadow:0 0 12px #4ade8080;
 }
 
-/* GRID */
-
 .grid {
-    display: grid;
-    grid-template-columns: 1.45fr 1fr;
-    gap: 20px;
+    display:grid;
+    grid-template-columns:1.45fr 1fr;
+    gap:20px;
 }
 
 .card {
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 23px;
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:20px;
+    padding:23px;
 }
 
 .heading {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 18px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:18px;
 }
 
 .heading h2 {
-    font-size: 14px;
-    margin: 0;
+    font-size:14px;
+    margin:0;
 }
 
 .heading span {
-    font-size: 11px;
-    color: var(--muted);
+    font-size:11px;
+    color:var(--muted);
 }
 
 /* CAMERA */
 
 .camera {
-    background: #050812;
-    border: 1px solid #202b3e;
-    border-radius: 15px;
-    min-height: 300px;
-    overflow: hidden;
-    position: relative;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    background:#050812;
+    border:1px solid #202b3e;
+    border-radius:15px;
+    min-height:300px;
+    overflow:hidden;
+    position:relative;
+    display:flex;
+    justify-content:center;
+    align-items:center;
 }
 
 #webcam-container {
-    width: 100%;
-    display: flex;
-    justify-content: center;
+    width:100%;
+    display:flex;
+    justify-content:center;
 }
 
 #webcam-container canvas {
-    display: block;
-    width: 100%;
-    height: auto;
-    object-fit: contain;
-    max-height: 500px;
+    display:block;
+    width:100%;
+    height:auto;
+    object-fit:contain;
+    max-height:500px;
 }
 
 .camera-placeholder {
-    text-align: center;
-    color: #64748b;
-    padding: 30px;
+    text-align:center;
+    color:#64748b;
+    padding:30px;
 }
 
 .camera-placeholder .icon {
-    font-size: 45px;
-    margin-bottom: 12px;
+    font-size:45px;
+    margin-bottom:12px;
 }
 
 .camera-placeholder strong {
-    color: #aab6cc;
-    font-size: 14px;
+    color:#aab6cc;
+    font-size:14px;
 }
 
 .camera-placeholder p {
-    font-size: 12px;
+    font-size:12px;
 }
 
 .camera-badge {
-    position: absolute;
-    top: 12px;
-    left: 12px;
-    background: #080d18d9;
-    padding: 8px 11px;
-    border: 1px solid #273347;
-    border-radius: 9px;
-    color: #c4cde0;
-    font-size: 11px;
-    z-index: 2;
+    position:absolute;
+    top:12px;
+    left:12px;
+    background:#080d18dd;
+    padding:8px 11px;
+    border:1px solid #273347;
+    border-radius:9px;
+    color:#c4cde0;
+    font-size:11px;
+    z-index:2;
 }
 
 /* BUTTONS */
 
 .controls {
-    display: flex;
-    gap: 10px;
-    margin-top: 15px;
+    display:flex;
+    gap:10px;
+    margin-top:15px;
 }
 
 .primary {
-    flex: 1;
-    background: linear-gradient(135deg, var(--blue), var(--purple));
-    color: white;
-    border: 0;
-    border-radius: 12px;
-    padding: 14px;
-    font-weight: 700;
-    font-size: 13px;
+    flex:1;
+    background:linear-gradient(135deg,var(--blue),var(--purple));
+    color:white;
+    border:0;
+    border-radius:12px;
+    padding:14px;
+    font-weight:700;
+    font-size:13px;
 }
 
 .primary:hover {
-    filter: brightness(1.15);
-    transform: translateY(-1px);
+    filter:brightness(1.15);
+    transform:translateY(-1px);
 }
 
 .secondary {
-    background: #192337;
-    border: 1px solid #29364c;
-    color: #bdc9dd;
-    padding: 14px 20px;
-    border-radius: 12px;
+    background:#192337;
+    border:1px solid #29364c;
+    color:#bdc9dd;
+    padding:14px 20px;
+    border-radius:12px;
 }
 
 /* STATUS */
 
 .status-box {
-    background: var(--panel2);
-    border: 1px solid #222d40;
-    padding: 20px;
-    border-radius: 15px;
+    background:var(--panel2);
+    border:1px solid #222d40;
+    padding:20px;
+    border-radius:15px;
 }
 
 .status-flex {
-    display: flex;
-    align-items: center;
-    gap: 13px;
+    display:flex;
+    align-items:center;
+    gap:13px;
 }
 
 .status-icon {
-    width: 48px;
-    height: 48px;
-    border-radius: 14px;
-    display: grid;
-    place-items: center;
-    background: #1b263b;
-    font-size: 22px;
+    width:48px;
+    height:48px;
+    border-radius:14px;
+    display:grid;
+    place-items:center;
+    background:#1b263b;
+    font-size:22px;
 }
 
 .small-label {
-    color: var(--muted);
-    font-size: 11px;
-    margin-bottom: 5px;
+    color:var(--muted);
+    font-size:11px;
+    margin-bottom:5px;
 }
 
 .status {
-    font-size: 23px;
-    font-weight: 800;
+    font-size:23px;
+    font-weight:800;
 }
 
-.status.awake { color: var(--green); }
-.status.sleeping { color: #a78bfa; }
-.status.waiting { color: #93a4bd; }
-.status.unknown { color: var(--yellow); }
+.status.awake { color:var(--green); }
+.status.sleeping { color:#a78bfa; }
+.status.waiting { color:#93a4bd; }
+.status.unknown { color:var(--yellow); }
+
+/* CONFIDENCE */
 
 .confidence {
-    margin-top: 22px;
+    margin-top:22px;
 }
 
 .confidence-top {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 9px;
-    font-size: 12px;
+    display:flex;
+    justify-content:space-between;
+    margin-bottom:9px;
+    font-size:12px;
 }
 
 .confidence-top span:first-child {
-    color: var(--muted);
+    color:var(--muted);
 }
 
 .confidence-top span:last-child {
-    font-weight: 700;
+    font-weight:700;
 }
 
 .bar {
-    height: 8px;
-    background: #202b3d;
-    border-radius: 20px;
-    overflow: hidden;
+    height:8px;
+    background:#202b3d;
+    border-radius:20px;
+    overflow:hidden;
 }
 
 .fill {
-    height: 100%;
-    width: 0;
-    background: linear-gradient(90deg, #6366f1, #a78bfa);
-    transition: width .3s;
-    border-radius: 20px;
+    height:100%;
+    width:0;
+    background:linear-gradient(90deg,#6366f1,#a78bfa);
+    transition:width .3s;
+    border-radius:20px;
 }
 
 .stats {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 11px;
-    margin-top: 16px;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:11px;
+    margin-top:16px;
 }
 
 .stat {
-    padding: 15px;
-    border: 1px solid #202b3d;
-    background: #111a2a;
-    border-radius: 13px;
+    padding:15px;
+    border:1px solid #202b3d;
+    background:#111a2a;
+    border-radius:13px;
 }
 
 .stat-label {
-    color: var(--muted);
-    font-size: 11px;
+    color:var(--muted);
+    font-size:11px;
 }
 
 .stat-value {
-    font-size: 20px;
-    font-weight: 800;
-    margin-top: 8px;
+    font-size:20px;
+    font-weight:800;
+    margin-top:8px;
 }
 
 /* SETTINGS */
 
 .settings {
-    margin-top: 20px;
-    padding: 18px;
-    border: 1px solid #253047;
-    background: #0e1523;
-    border-radius: 15px;
+    margin-top:20px;
+    padding:18px;
+    border:1px solid #253047;
+    background:#0e1523;
+    border-radius:15px;
 }
 
 .settings h3 {
-    margin: 0 0 17px;
-    font-size: 13px;
+    margin:0 0 17px;
+    font-size:13px;
 }
 
 .setting {
-    margin-bottom: 18px;
+    margin-bottom:18px;
 }
 
 .setting:last-child {
-    margin-bottom: 0;
+    margin-bottom:0;
 }
 
 .setting-title {
-    display: flex;
-    justify-content: space-between;
-    font-size: 12px;
-    margin-bottom: 10px;
+    display:flex;
+    justify-content:space-between;
+    font-size:12px;
+    margin-bottom:10px;
 }
 
 .setting-title span:last-child {
-    color: #a5b4cc;
+    color:#a5b4cc;
 }
 
 input[type="range"] {
-    width: 100%;
-    accent-color: #8b5cf6;
+    width:100%;
+    accent-color:#8b5cf6;
 }
 
 .setting-note {
-    color: #718099;
-    font-size: 10px;
-    line-height: 1.6;
-    margin-top: 7px;
+    color:#718099;
+    font-size:10px;
+    line-height:1.6;
+    margin-top:7px;
 }
 
 .toggle-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 10px;
-    margin-top: 18px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+    margin-top:18px;
 }
 
-.toggle-row strong {
-    font-size: 12px;
-}
+.toggle-row strong { font-size:12px; }
 
 .toggle-row small {
-    display: block;
-    color: var(--muted);
-    font-size: 10px;
-    margin-top: 4px;
+    display:block;
+    color:var(--muted);
+    font-size:10px;
+    margin-top:4px;
 }
 
 .toggle {
-    position: relative;
-    width: 44px;
-    height: 24px;
-    flex-shrink: 0;
+    position:relative;
+    width:44px;
+    height:24px;
+    flex-shrink:0;
 }
 
 .toggle input {
-    opacity: 0;
-    width: 0;
-    height: 0;
+    opacity:0;
+    width:0;
+    height:0;
 }
 
 .toggle span {
-    position: absolute;
-    inset: 0;
-    background: #344158;
-    border-radius: 30px;
-    cursor: pointer;
-    transition: .2s;
+    position:absolute;
+    inset:0;
+    background:#344158;
+    border-radius:30px;
+    cursor:pointer;
+    transition:.2s;
 }
 
 .toggle span::before {
-    content: "";
-    width: 18px;
-    height: 18px;
-    position: absolute;
-    left: 3px;
-    top: 3px;
-    background: white;
-    border-radius: 50%;
-    transition: .2s;
+    content:"";
+    width:18px;
+    height:18px;
+    position:absolute;
+    left:3px;
+    top:3px;
+    background:white;
+    border-radius:50%;
+    transition:.2s;
 }
 
 .toggle input:checked + span {
-    background: #7c5cf5;
+    background:#7c5cf5;
 }
 
 .toggle input:checked + span::before {
-    transform: translateX(20px);
+    transform:translateX(20px);
 }
 
 .alarm-button {
-    margin-top: 14px;
-    width: 100%;
-    padding: 11px;
-    border: 1px solid #2a3650;
-    border-radius: 10px;
-    background: #192338;
-    color: #bac7db;
-    font-size: 11px;
+    margin-top:14px;
+    width:100%;
+    padding:11px;
+    border:1px solid #2a3650;
+    border-radius:10px;
+    background:#192338;
+    color:#bac7db;
+    font-size:11px;
 }
 
-.alarm-button:hover {
-    background: #243149;
-}
+.alarm-button:hover { background:#243149; }
 
 .alarm-button.active {
-    border-color: #7c5cf5;
-    color: #c4b5fd;
+    border-color:#7c5cf5;
+    color:#c4b5fd;
 }
 
+/* CALIBRATION */
+
 .calibration {
-    margin-top: 20px;
-    padding: 17px;
-    background: #17182b;
-    border: 1px solid #34305a;
-    border-radius: 14px;
+    margin-top:20px;
+    padding:17px;
+    background:#17182b;
+    border:1px solid #34305a;
+    border-radius:14px;
 }
 
 .calibration h3 {
-    margin: 0 0 8px;
-    font-size: 13px;
+    margin:0 0 8px;
+    font-size:13px;
 }
 
 .calibration p {
-    color: #8995ad;
-    font-size: 11px;
-    line-height: 1.6;
-    margin: 0 0 12px;
+    color:#8995ad;
+    font-size:11px;
+    line-height:1.6;
+    margin:0 0 12px;
 }
 
 .calibration-bar {
-    height: 6px;
-    background: #292943;
-    border-radius: 10px;
-    overflow: hidden;
+    height:6px;
+    background:#292943;
+    border-radius:10px;
+    overflow:hidden;
 }
 
 .calibration-fill {
-    height: 100%;
-    width: 0;
-    background: #8b5cf6;
-    transition: width .3s;
+    height:100%;
+    width:0;
+    background:#8b5cf6;
+    transition:width .3s;
 }
 
 .calibration-info {
-    display: flex;
-    justify-content: space-between;
-    color: #a6a2d0;
-    font-size: 10px;
-    margin-top: 9px;
+    display:flex;
+    justify-content:space-between;
+    color:#a6a2d0;
+    font-size:10px;
+    margin-top:9px;
 }
 
-/* CLASS DETAILS */
+/* CLASS LIST */
 
-.class-list {
-    margin-top: 20px;
-}
+.class-list { margin-top:20px; }
 
-.class-row {
-    margin-top: 12px;
-}
+.class-row { margin-top:12px; }
 
 .class-row-top {
-    display: flex;
-    justify-content: space-between;
-    font-size: 11px;
-    margin-bottom: 7px;
+    display:flex;
+    justify-content:space-between;
+    font-size:11px;
+    margin-bottom:7px;
 }
 
-.class-row-top span:first-child {
-    color: #aab7ce;
-}
+.class-row-top span:first-child { color:#aab7ce; }
 
 .class-bar {
-    height: 6px;
-    background: #202b3d;
-    border-radius: 10px;
-    overflow: hidden;
+    height:6px;
+    background:#202b3d;
+    border-radius:10px;
+    overflow:hidden;
 }
 
 .class-fill {
-    height: 100%;
-    width: 0;
-    background: #64748b;
-    transition: width .25s;
-    border-radius: 10px;
+    height:100%;
+    width:0;
+    background:#64748b;
+    transition:width .25s;
+    border-radius:10px;
 }
 
 /* FOOTER */
 
 footer {
-    text-align: center;
-    color: #526079;
-    font-size: 11px;
-    padding: 25px 0 10px;
+    text-align:center;
+    color:#526079;
+    font-size:11px;
+    padding:25px 0 10px;
 }
 
-.hidden {
-    display: none !important;
-}
+.hidden { display:none !important; }
 
 @media(max-width:850px) {
-    .grid {
-        grid-template-columns: 1fr;
-    }
+    .grid { grid-template-columns:1fr; }
 }
 
 @media(max-width:500px) {
-    .app {
-        padding: 20px 13px;
-    }
-
-    header {
-        align-items: flex-start;
-    }
-
-    .brand h1 {
-        font-size: 18px;
-    }
-
-    .live-pill {
-        padding: 8px 10px;
-    }
-
-    .card {
-        padding: 17px;
-    }
-
-    .camera {
-        min-height: 220px;
-    }
+    .app { padding:20px 13px; }
+    header { align-items:flex-start; }
+    .brand h1 { font-size:18px; }
+    .live-pill { padding:8px 10px; }
+    .card { padding:17px; }
+    .camera { min-height:220px; }
 }
 </style>
 </head>
@@ -663,11 +615,10 @@ footer {
         </button>
     </div>
 
-    <!-- CALIBRATION -->
     <div class="calibration">
         <h3>⚙️ Personal Calibration</h3>
         <p id="calibrationText">
-            Calibration helps establish a baseline for the current camera and lighting conditions.
+            Calibration records the model's awake confidence during setup.
         </p>
 
         <div class="calibration-bar">
@@ -680,7 +631,6 @@ footer {
         </div>
     </div>
 
-    <!-- CLASS BREAKDOWN -->
     <div class="class-list">
         <div class="heading">
             <h2>AI Class Probabilities</h2>
@@ -732,7 +682,6 @@ footer {
         </div>
     </div>
 
-    <!-- SETTINGS -->
     <div class="settings">
         <h3>Detection Settings</h3>
 
@@ -783,7 +732,7 @@ footer {
 
             <label class="toggle">
                 <input type="checkbox" id="alarmToggle" checked>
-            <span></span>
+                <span></span>
             </label>
         </div>
 
@@ -802,9 +751,15 @@ footer {
 </div>
 
 <script>
+/* ================================
+   CONFIGURATION
+================================ */
+
 const URL = "https://teachablemachine.withgoogle.com/models/tHzy5HgAx/";
 
-let model, webcam;
+let model = null;
+let webcam = null;
+
 let running = false;
 let loading = false;
 
@@ -813,7 +768,6 @@ let candidateState = null;
 let candidateSince = 0;
 
 let sleepStart = null;
-let sleepSeconds = 0;
 let frameCount = 0;
 
 let alarmEnabled = true;
@@ -825,12 +779,13 @@ let alarmTimeout = null;
 let calibrationRunning = false;
 let calibrationDone = false;
 let calibrationStart = 0;
-let calibrationDuration = 5000;
+const calibrationDuration = 5000;
+
 let awakeSamples = 0;
 let awakeConfidenceSum = 0;
 let calibratedAwakeConfidence = 0;
 
-let lastPrediction = null;
+let lastPrediction = [];
 
 const statusText = document.getElementById("statusText");
 const statusIcon = document.getElementById("statusIcon");
@@ -844,7 +799,9 @@ const stabilitySlider = document.getElementById("stability");
 const delaySlider = document.getElementById("alarmDelay");
 const alarmToggle = document.getElementById("alarmToggle");
 
-// SETTINGS
+/* ================================
+   SETTINGS EVENTS
+================================ */
 
 thresholdSlider.addEventListener("input", () => {
     document.getElementById("thresholdValue").textContent =
@@ -866,10 +823,13 @@ alarmToggle.addEventListener("change", () => {
 
     if (!alarmEnabled) {
         stopAlarm();
+        cancelPendingAlarm();
     }
 });
 
-// START
+/* ================================
+   START MONITOR
+================================ */
 
 async function startMonitor() {
     if (running || loading) return;
@@ -878,23 +838,71 @@ async function startMonitor() {
 
     const btn = document.getElementById("startBtn");
     btn.disabled = true;
-    btn.textContent = "Loading model...";
+    btn.textContent = "Loading AI model...";
 
     try {
-        model = await tmImage.load(URL + "model.json", URL + "metadata.json");
+        // Browser compatibility check
+        if (!navigator.mediaDevices ||
+            !navigator.mediaDevices.getUserMedia) {
+
+            throw new Error(
+                "CAMERA_UNSUPPORTED: Webcam access requires HTTPS or localhost and a supported browser."
+            );
+        }
+
+        // Load model
+        btn.textContent = "Loading model...";
+
+        try {
+            model = await tmImage.load(
+                URL + "model.json",
+                URL + "metadata.json"
+            );
+        } catch (error) {
+            throw new Error(
+                "MODEL_ERROR: " + (error.message || error)
+            );
+        }
+
+        console.log("AI model loaded successfully");
+
+        // Setup webcam
+        btn.textContent = "Connecting camera...";
 
         webcam = new tmImage.Webcam(320, 320, true);
 
-        await webcam.setup();
-        await webcam.play();
+        try {
+            await webcam.setup();
+        } catch (error) {
+            throw new Error(
+                "CAMERA_ERROR: " + (error.message || error)
+            );
+        }
 
-        document.getElementById("webcam-container").innerHTML = "";
-        document.getElementById("webcam-container").appendChild(webcam.canvas);
+        // Play webcam
+        try {
+            await webcam.play();
+        } catch (error) {
+            throw new Error(
+                "CAMERA_PLAY_ERROR: " + (error.message || error)
+            );
+        }
 
-        document.getElementById("placeholder").classList.add("hidden");
+        // Display webcam
+        const webcamContainer =
+            document.getElementById("webcam-container");
 
-        document.getElementById("liveDot").classList.add("active");
-        document.getElementById("cameraDot").classList.add("active");
+        webcamContainer.innerHTML = "";
+        webcamContainer.appendChild(webcam.canvas);
+
+        document.getElementById("placeholder")
+            .classList.add("hidden");
+
+        document.getElementById("liveDot")
+            .classList.add("active");
+
+        document.getElementById("cameraDot")
+            .classList.add("active");
 
         document.getElementById("liveText").textContent = "Live";
         document.getElementById("cameraLabel").textContent = "Camera active";
@@ -911,7 +919,7 @@ async function startMonitor() {
         loop();
 
     } catch (error) {
-        console.error(error);
+        console.error("Sleep Monitor startup error:", error);
 
         running = false;
         loading = false;
@@ -919,15 +927,42 @@ async function startMonitor() {
         btn.disabled = false;
         btn.textContent = "▶ Start Monitoring";
 
-        alert("Could not start camera or load AI model. Check camera permission and internet connection.");
+        if (webcam) {
+            try {
+                webcam.stop();
+            } catch (e) {}
+
+            webcam = null;
+        }
+
+        let message = error.message || "Unknown error";
+
+        if (message.includes("MODEL_ERROR")) {
+            message =
+                "AI MODEL FAILED TO LOAD\n\n" +
+                "Check your Teachable Machine model URL and internet connection.\n\n" +
+                "Details: " + message;
+
+        } else if (message.includes("CAMERA")) {
+            message =
+                "CAMERA FAILED TO START\n\n" +
+                "Allow camera access in your browser settings. " +
+                "Make sure no other app is using the camera.\n\n" +
+                "Details: " + message;
+        }
+
+        alert(message);
     }
 }
 
-// CALIBRATION
+/* ================================
+   CALIBRATION
+================================ */
 
 function resetCalibration() {
     calibrationRunning = false;
     calibrationDone = false;
+
     awakeSamples = 0;
     awakeConfidenceSum = 0;
     calibratedAwakeConfidence = 0;
@@ -935,29 +970,39 @@ function resetCalibration() {
     document.getElementById("calibrationFill").style.width = "0%";
     document.getElementById("calibrationPercent").textContent = "0%";
     document.getElementById("calibrationStatus").textContent = "Not calibrated";
+
+    document.getElementById("calibrationText").textContent =
+        "Calibration records the model's awake confidence during setup.";
 }
 
 function beginCalibration() {
     calibrationRunning = true;
     calibrationStart = Date.now();
 
-    document.getElementById("calibrationStatus").textContent = "Calibrating...";
+    document.getElementById("calibrationStatus").textContent =
+        "Calibrating...";
+
     document.getElementById("calibrationText").textContent =
-        "Sit normally in front of the camera and stay awake during calibration.";
+        "Keep the camera pointed at the usual position. Calibration is in progress.";
 }
 
 function updateCalibration(awakeProbability) {
     if (!calibrationRunning) return;
 
     const elapsed = Date.now() - calibrationStart;
-    const progress = Math.min(100, (elapsed / calibrationDuration) * 100);
 
-    document.getElementById("calibrationFill").style.width = progress + "%";
+    const progress = Math.min(
+        100,
+        (elapsed / calibrationDuration) * 100
+    );
+
+    document.getElementById("calibrationFill").style.width =
+        progress + "%";
+
     document.getElementById("calibrationPercent").textContent =
         Math.round(progress) + "%";
 
-    // Collect awake confidence samples during calibration.
-    if (awakeProbability !== null && awakeProbability > 0) {
+    if (awakeProbability !== null && awakeProbability >= 0) {
         awakeConfidenceSum += awakeProbability;
         awakeSamples++;
     }
@@ -966,20 +1011,29 @@ function updateCalibration(awakeProbability) {
         calibrationRunning = false;
         calibrationDone = true;
 
-        calibratedAwakeConfidence = awakeSamples
+        calibratedAwakeConfidence = awakeSamples > 0
             ? awakeConfidenceSum / awakeSamples
             : 0;
 
-        document.getElementById("calibrationStatus").textContent = "Complete";
+        document.getElementById("calibrationStatus").textContent =
+            "Complete";
+
         document.getElementById("calibrationText").textContent =
             "Calibration complete. Monitoring is active.";
 
         document.getElementById("calibrationFill").style.width = "100%";
         document.getElementById("calibrationPercent").textContent = "100%";
+
+        console.log(
+            "Calibration finished. Awake confidence average:",
+            calibratedAwakeConfidence
+        );
     }
 }
 
-// LOOP
+/* ================================
+   MAIN LOOP
+================================ */
 
 async function loop() {
     if (!running) return;
@@ -996,7 +1050,27 @@ async function loop() {
     }
 }
 
-// PREDICTION
+/* ================================
+   PREDICTION
+================================ */
+
+function normalizeLabel(label) {
+    return label.toLowerCase().trim();
+}
+
+function getClassProbability(predictions, keywords) {
+    let result = 0;
+
+    for (const p of predictions) {
+        const label = normalizeLabel(p.className);
+
+        if (keywords.some(keyword => label.includes(keyword))) {
+            result = Math.max(result, p.probability);
+        }
+    }
+
+    return result;
+}
 
 async function predict() {
     const predictions = await model.predict(webcam.canvas);
@@ -1008,75 +1082,86 @@ async function predict() {
 
     renderClassProbabilities(predictions);
 
-    let sleepProbability = 0;
-    let awakeProbability = 0;
+    // Sleep class aliases
+    const sleepProbability = getClassProbability(
+        predictions,
+        ["sleep", "sov", "sover"]
+    );
 
-    for (const p of predictions) {
-        const label = p.className.toLowerCase();
-
-        if (label.includes("sleep") || label.includes("sov")) {
-            sleepProbability = p.probability;
-        }
-
-        if (label.includes("awake") || label.includes("våken") || label.includes("vaken")) {
-            awakeProbability = p.probability;
-        }
-    }
+    // Awake class aliases
+    const awakeProbability = getClassProbability(
+        predictions,
+        ["awake", "våken", "vaken", "alert"]
+    );
 
     const best = predictions.reduce((a, b) =>
         a.probability > b.probability ? a : b
     );
 
-    const threshold = Number(thresholdSlider.value) / 100;
+    confidenceText.textContent =
+        Math.round(best.probability * 100) + "%";
 
-    confidenceText.textContent = Math.round(best.probability * 100) + "%";
-    confidenceFill.style.width = (best.probability * 100) + "%";
+    confidenceFill.style.width =
+        (best.probability * 100) + "%";
 
-    // Calibration collects awake probability but does not retrain the model.
+    // Calibration
     updateCalibration(awakeProbability);
 
-    // Don't make decisions until calibration is complete.
     if (!calibrationDone) {
-        setState("calibrating");
+        showState("calibrating");
         return;
     }
+
+    const threshold = Number(thresholdSlider.value) / 100;
 
     let detected = "unknown";
 
-    if (sleepProbability >= threshold) {
+    if (sleepProbability >= threshold &&
+        sleepProbability > awakeProbability) {
+
         detected = "sleeping";
-    } else if (awakeProbability >= threshold) {
+
+    } else if (awakeProbability >= threshold &&
+               awakeProbability > sleepProbability) {
+
         detected = "awake";
     }
 
-    // When confidence is too low, show Unknown.
+    // Unknown = model is not sufficiently confident
     if (detected === "unknown") {
         candidateState = null;
         candidateSince = 0;
-        setState("unknown");
+
+        showState("unknown");
         return;
     }
 
-    // Stabilization: require same candidate state over a time period.
+    // Stability logic
     if (candidateState !== detected) {
         candidateState = detected;
         candidateSince = Date.now();
     }
 
-    const stableSeconds = Number(stabilitySlider.value);
-    const stableDuration = Date.now() - candidateSince;
+    const stableDuration =
+        Date.now() - candidateSince;
 
-    if (stableDuration >= stableSeconds * 1000) {
-        setState(detected);
+    const requiredStability =
+        Number(stabilitySlider.value) * 1000;
+
+    if (stableDuration >= requiredStability) {
+        showState(detected);
     } else {
-        setState("checking");
+        showState("checking");
     }
 }
 
-// PROBABILITY DISPLAY
+/* ================================
+   CLASS PROBABILITY DISPLAY
+================================ */
 
 function renderClassProbabilities(predictions) {
     const container = document.getElementById("label-container");
+
     container.innerHTML = "";
 
     predictions.forEach(p => {
@@ -1104,7 +1189,7 @@ function renderClassProbabilities(predictions) {
         fill.className = "class-fill";
         fill.style.width = percentage + "%";
 
-        if (p.probability > 0.8) {
+        if (p.probability >= 0.8) {
             fill.style.background = "#8b5cf6";
         }
 
@@ -1116,9 +1201,11 @@ function renderClassProbabilities(predictions) {
     });
 }
 
-// STATE
+/* ================================
+   STATUS MANAGEMENT
+================================ */
 
-function setState(state) {
+function showState(state) {
     if (state === currentState) return;
 
     currentState = state;
@@ -1145,6 +1232,7 @@ function setState(state) {
 
             sleepStart = null;
             stopAlarm();
+            cancelPendingAlarm();
             break;
 
         case "unknown":
@@ -1152,7 +1240,6 @@ function setState(state) {
             statusText.className = "status unknown";
             statusIcon.textContent = "❔";
 
-            // Cancel pending alarm when detection is uncertain.
             cancelPendingAlarm();
             break;
 
@@ -1170,25 +1257,29 @@ function setState(state) {
     }
 }
 
-// TIMER
+/* ================================
+   TIMER
+================================ */
 
 function updateTimer() {
+    let seconds = 0;
+
     if (sleepStart && currentState === "sleeping") {
-        sleepSeconds = Math.floor((Date.now() - sleepStart) / 1000);
-    } else {
-        sleepSeconds = 0;
+        seconds = Math.floor((Date.now() - sleepStart) / 1000);
     }
 
-    const h = String(Math.floor(sleepSeconds / 3600)).padStart(2, "0");
-    const m = String(Math.floor((sleepSeconds % 3600) / 60)).padStart(2, "0");
-    const s = String(sleepSeconds % 60).padStart(2, "0");
+    const h = String(Math.floor(seconds / 3600)).padStart(2, "0");
+    const m = String(Math.floor((seconds % 3600) / 60)).padStart(2, "0");
+    const s = String(seconds % 60).padStart(2, "0");
 
     sleepTimer.textContent = `${h}:${m}:${s}`;
 }
 
 setInterval(updateTimer, 1000);
 
-// ALARM
+/* ================================
+   ALARM
+================================ */
 
 function scheduleAlarm() {
     if (!alarmEnabled || alarmActive || alarmTimeout) return;
@@ -1203,7 +1294,10 @@ function scheduleAlarm() {
     alarmTimeout = setTimeout(() => {
         alarmTimeout = null;
 
-        if (running && currentState === "sleeping" && alarmEnabled) {
+        if (running &&
+            currentState === "sleeping" &&
+            alarmEnabled) {
+
             startAlarm();
         }
     }, delay);
@@ -1221,8 +1315,9 @@ function startAlarm() {
 
     alarmActive = true;
 
-    document.getElementById("testAlarm").textContent = "🔕 Stop Alarm";
-    document.getElementById("testAlarm").classList.add("active");
+    const button = document.getElementById("testAlarm");
+    button.textContent = "🔕 Stop Alarm";
+    button.classList.add("active");
 
     playAlarmSound();
 }
@@ -1231,7 +1326,8 @@ function playAlarmSound() {
     stopSoundLoop();
 
     try {
-        alarmAudioContext = new (window.AudioContext || window.webkitAudioContext)();
+        alarmAudioContext =
+            new (window.AudioContext || window.webkitAudioContext)();
 
         const ctx = alarmAudioContext;
 
@@ -1245,8 +1341,12 @@ function playAlarmSound() {
             osc.frequency.value = 880;
 
             gain.gain.setValueAtTime(0.0001, ctx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.2, ctx.currentTime + 0.03);
-            gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.4);
+            gain.gain.exponentialRampToValueAtTime(
+                0.2, ctx.currentTime + 0.03
+            );
+            gain.gain.exponentialRampToValueAtTime(
+                0.0001, ctx.currentTime + 0.4
+            );
 
             osc.connect(gain);
             gain.connect(ctx.destination);
@@ -1258,8 +1358,8 @@ function playAlarmSound() {
         beep();
         alarmInterval = setInterval(beep, 900);
 
-    } catch (e) {
-        console.log("Could not play alarm:", e);
+    } catch (error) {
+        console.error("Alarm sound error:", error);
     }
 }
 
@@ -1279,20 +1379,22 @@ function stopAlarm() {
     alarmActive = false;
     stopSoundLoop();
 
-    document.getElementById("testAlarm").textContent = "🔔 Test Alarm Sound";
-    document.getElementById("testAlarm").classList.remove("active");
+    const button = document.getElementById("testAlarm");
+    button.textContent = "🔔 Test Alarm Sound";
+    button.classList.remove("active");
 }
 
 function testAlarm() {
     if (alarmActive) {
         stopAlarm();
-        return;
+    } else {
+        startAlarm();
     }
-
-    startAlarm();
 }
 
-// STOP
+/* ================================
+   STOP MONITOR
+================================ */
 
 function stopMonitor() {
     running = false;
@@ -1305,6 +1407,7 @@ function stopMonitor() {
         try {
             webcam.stop();
         } catch (e) {}
+
         webcam = null;
     }
 
@@ -1334,9 +1437,12 @@ function stopMonitor() {
     confidenceFill.style.width = "0%";
 
     sleepTimer.textContent = "00:00:00";
+    framesEl.textContent = "0";
+    frameCount = 0;
 
     resetCalibration();
 }
 </script>
+
 </body>
 </html>
