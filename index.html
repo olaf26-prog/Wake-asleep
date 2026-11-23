@@ -1,0 +1,1342 @@
+
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sleep Monitor 2.0</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+:root {
+    --bg: #080b14;
+    --panel: #111827;
+    --panel2: #0d1422;
+    --border: #222d40;
+    --text: #eef2ff;
+    --muted: #8391aa;
+    --purple: #8b5cf6;
+    --blue: #6366f1;
+    --green: #4ade80;
+    --red: #fb7185;
+    --yellow: #fbbf24;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: Inter, sans-serif;
+}
+
+body::before {
+    content: "";
+    position: fixed;
+    width: 500px;
+    height: 500px;
+    background: #635bff;
+    filter: blur(180px);
+    opacity: .07;
+    top: -200px;
+    right: -100px;
+    pointer-events: none;
+}
+
+button, input {
+    font-family: inherit;
+}
+
+button {
+    cursor: pointer;
+    transition: .2s;
+}
+
+button:disabled {
+    opacity: .5;
+    cursor: not-allowed;
+}
+
+.app {
+    max-width: 1250px;
+    padding: 32px 22px;
+    margin: auto;
+}
+
+/* HEADER */
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.logo {
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, #6366f1, #a855f7);
+    display: grid;
+    place-items: center;
+    border-radius: 15px;
+    font-size: 23px;
+}
+
+.brand h1 {
+    font-size: 20px;
+    margin: 0;
+    letter-spacing: -.6px;
+}
+
+.brand p {
+    margin: 5px 0 0;
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.live-pill {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #111a2b;
+    border: 1px solid var(--border);
+    padding: 10px 14px;
+    border-radius: 30px;
+    color: #a8b5cc;
+    font-size: 12px;
+}
+
+.dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #64748b;
+}
+
+.dot.active {
+    background: var(--green);
+    box-shadow: 0 0 12px #4ade8080;
+}
+
+/* GRID */
+
+.grid {
+    display: grid;
+    grid-template-columns: 1.45fr 1fr;
+    gap: 20px;
+}
+
+.card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 23px;
+}
+
+.heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 18px;
+}
+
+.heading h2 {
+    font-size: 14px;
+    margin: 0;
+}
+
+.heading span {
+    font-size: 11px;
+    color: var(--muted);
+}
+
+/* CAMERA */
+
+.camera {
+    background: #050812;
+    border: 1px solid #202b3e;
+    border-radius: 15px;
+    min-height: 300px;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#webcam-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+#webcam-container canvas {
+    display: block;
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+    max-height: 500px;
+}
+
+.camera-placeholder {
+    text-align: center;
+    color: #64748b;
+    padding: 30px;
+}
+
+.camera-placeholder .icon {
+    font-size: 45px;
+    margin-bottom: 12px;
+}
+
+.camera-placeholder strong {
+    color: #aab6cc;
+    font-size: 14px;
+}
+
+.camera-placeholder p {
+    font-size: 12px;
+}
+
+.camera-badge {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    background: #080d18d9;
+    padding: 8px 11px;
+    border: 1px solid #273347;
+    border-radius: 9px;
+    color: #c4cde0;
+    font-size: 11px;
+    z-index: 2;
+}
+
+/* BUTTONS */
+
+.controls {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.primary {
+    flex: 1;
+    background: linear-gradient(135deg, var(--blue), var(--purple));
+    color: white;
+    border: 0;
+    border-radius: 12px;
+    padding: 14px;
+    font-weight: 700;
+    font-size: 13px;
+}
+
+.primary:hover {
+    filter: brightness(1.15);
+    transform: translateY(-1px);
+}
+
+.secondary {
+    background: #192337;
+    border: 1px solid #29364c;
+    color: #bdc9dd;
+    padding: 14px 20px;
+    border-radius: 12px;
+}
+
+/* STATUS */
+
+.status-box {
+    background: var(--panel2);
+    border: 1px solid #222d40;
+    padding: 20px;
+    border-radius: 15px;
+}
+
+.status-flex {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+}
+
+.status-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    display: grid;
+    place-items: center;
+    background: #1b263b;
+    font-size: 22px;
+}
+
+.small-label {
+    color: var(--muted);
+    font-size: 11px;
+    margin-bottom: 5px;
+}
+
+.status {
+    font-size: 23px;
+    font-weight: 800;
+}
+
+.status.awake { color: var(--green); }
+.status.sleeping { color: #a78bfa; }
+.status.waiting { color: #93a4bd; }
+.status.unknown { color: var(--yellow); }
+
+.confidence {
+    margin-top: 22px;
+}
+
+.confidence-top {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 9px;
+    font-size: 12px;
+}
+
+.confidence-top span:first-child {
+    color: var(--muted);
+}
+
+.confidence-top span:last-child {
+    font-weight: 700;
+}
+
+.bar {
+    height: 8px;
+    background: #202b3d;
+    border-radius: 20px;
+    overflow: hidden;
+}
+
+.fill {
+    height: 100%;
+    width: 0;
+    background: linear-gradient(90deg, #6366f1, #a78bfa);
+    transition: width .3s;
+    border-radius: 20px;
+}
+
+.stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 11px;
+    margin-top: 16px;
+}
+
+.stat {
+    padding: 15px;
+    border: 1px solid #202b3d;
+    background: #111a2a;
+    border-radius: 13px;
+}
+
+.stat-label {
+    color: var(--muted);
+    font-size: 11px;
+}
+
+.stat-value {
+    font-size: 20px;
+    font-weight: 800;
+    margin-top: 8px;
+}
+
+/* SETTINGS */
+
+.settings {
+    margin-top: 20px;
+    padding: 18px;
+    border: 1px solid #253047;
+    background: #0e1523;
+    border-radius: 15px;
+}
+
+.settings h3 {
+    margin: 0 0 17px;
+    font-size: 13px;
+}
+
+.setting {
+    margin-bottom: 18px;
+}
+
+.setting:last-child {
+    margin-bottom: 0;
+}
+
+.setting-title {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    margin-bottom: 10px;
+}
+
+.setting-title span:last-child {
+    color: #a5b4cc;
+}
+
+input[type="range"] {
+    width: 100%;
+    accent-color: #8b5cf6;
+}
+
+.setting-note {
+    color: #718099;
+    font-size: 10px;
+    line-height: 1.6;
+    margin-top: 7px;
+}
+
+.toggle-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    margin-top: 18px;
+}
+
+.toggle-row strong {
+    font-size: 12px;
+}
+
+.toggle-row small {
+    display: block;
+    color: var(--muted);
+    font-size: 10px;
+    margin-top: 4px;
+}
+
+.toggle {
+    position: relative;
+    width: 44px;
+    height: 24px;
+    flex-shrink: 0;
+}
+
+.toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle span {
+    position: absolute;
+    inset: 0;
+    background: #344158;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: .2s;
+}
+
+.toggle span::before {
+    content: "";
+    width: 18px;
+    height: 18px;
+    position: absolute;
+    left: 3px;
+    top: 3px;
+    background: white;
+    border-radius: 50%;
+    transition: .2s;
+}
+
+.toggle input:checked + span {
+    background: #7c5cf5;
+}
+
+.toggle input:checked + span::before {
+    transform: translateX(20px);
+}
+
+.alarm-button {
+    margin-top: 14px;
+    width: 100%;
+    padding: 11px;
+    border: 1px solid #2a3650;
+    border-radius: 10px;
+    background: #192338;
+    color: #bac7db;
+    font-size: 11px;
+}
+
+.alarm-button:hover {
+    background: #243149;
+}
+
+.alarm-button.active {
+    border-color: #7c5cf5;
+    color: #c4b5fd;
+}
+
+.calibration {
+    margin-top: 20px;
+    padding: 17px;
+    background: #17182b;
+    border: 1px solid #34305a;
+    border-radius: 14px;
+}
+
+.calibration h3 {
+    margin: 0 0 8px;
+    font-size: 13px;
+}
+
+.calibration p {
+    color: #8995ad;
+    font-size: 11px;
+    line-height: 1.6;
+    margin: 0 0 12px;
+}
+
+.calibration-bar {
+    height: 6px;
+    background: #292943;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.calibration-fill {
+    height: 100%;
+    width: 0;
+    background: #8b5cf6;
+    transition: width .3s;
+}
+
+.calibration-info {
+    display: flex;
+    justify-content: space-between;
+    color: #a6a2d0;
+    font-size: 10px;
+    margin-top: 9px;
+}
+
+/* CLASS DETAILS */
+
+.class-list {
+    margin-top: 20px;
+}
+
+.class-row {
+    margin-top: 12px;
+}
+
+.class-row-top {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    margin-bottom: 7px;
+}
+
+.class-row-top span:first-child {
+    color: #aab7ce;
+}
+
+.class-bar {
+    height: 6px;
+    background: #202b3d;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.class-fill {
+    height: 100%;
+    width: 0;
+    background: #64748b;
+    transition: width .25s;
+    border-radius: 10px;
+}
+
+/* FOOTER */
+
+footer {
+    text-align: center;
+    color: #526079;
+    font-size: 11px;
+    padding: 25px 0 10px;
+}
+
+.hidden {
+    display: none !important;
+}
+
+@media(max-width:850px) {
+    .grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media(max-width:500px) {
+    .app {
+        padding: 20px 13px;
+    }
+
+    header {
+        align-items: flex-start;
+    }
+
+    .brand h1 {
+        font-size: 18px;
+    }
+
+    .live-pill {
+        padding: 8px 10px;
+    }
+
+    .card {
+        padding: 17px;
+    }
+
+    .camera {
+        min-height: 220px;
+    }
+}
+</style>
+</head>
+
+<body>
+<div class="app">
+
+<header>
+    <div class="brand">
+        <div class="logo">🌙</div>
+        <div>
+            <h1>Sleep Monitor <span style="color:#8b5cf6">2.0</span></h1>
+            <p>Intelligent sleep detection system</p>
+        </div>
+    </div>
+
+    <div class="live-pill">
+        <div class="dot" id="liveDot"></div>
+        <span id="liveText">Offline</span>
+    </div>
+</header>
+
+<div class="grid">
+
+<!-- CAMERA CARD -->
+<div class="card">
+
+    <div class="heading">
+        <h2>Live Camera</h2>
+        <span>AI Vision</span>
+    </div>
+
+    <div class="camera">
+
+        <div class="camera-badge">
+            <span class="dot" id="cameraDot"></span>
+            <span id="cameraLabel">Camera inactive</span>
+        </div>
+
+        <div class="camera-placeholder" id="placeholder">
+            <div class="icon">📷</div>
+            <strong>Camera not connected</strong>
+            <p>Start the monitor to begin</p>
+        </div>
+
+        <div id="webcam-container"></div>
+    </div>
+
+    <div class="controls">
+        <button class="primary" id="startBtn" onclick="startMonitor()">
+            ▶ Start Monitoring
+        </button>
+
+        <button class="secondary" onclick="stopMonitor()">
+            ■ Stop
+        </button>
+    </div>
+
+    <!-- CALIBRATION -->
+    <div class="calibration">
+        <h3>⚙️ Personal Calibration</h3>
+        <p id="calibrationText">
+            Calibration helps establish a baseline for the current camera and lighting conditions.
+        </p>
+
+        <div class="calibration-bar">
+            <div class="calibration-fill" id="calibrationFill"></div>
+        </div>
+
+        <div class="calibration-info">
+            <span id="calibrationStatus">Not calibrated</span>
+            <span id="calibrationPercent">0%</span>
+        </div>
+    </div>
+
+    <!-- CLASS BREAKDOWN -->
+    <div class="class-list">
+        <div class="heading">
+            <h2>AI Class Probabilities</h2>
+            <span>Live prediction</span>
+        </div>
+
+        <div id="label-container"></div>
+    </div>
+</div>
+
+<!-- RIGHT SIDE -->
+<div class="card">
+
+    <div class="heading">
+        <h2>Detection Status</h2>
+        <span>System monitor</span>
+    </div>
+
+    <div class="status-box">
+        <div class="status-flex">
+            <div class="status-icon" id="statusIcon">🌙</div>
+            <div>
+                <div class="small-label">Current state</div>
+                <div class="status waiting" id="statusText">Waiting...</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="confidence">
+        <div class="confidence-top">
+            <span>Confidence</span>
+            <span id="confidenceText">0%</span>
+        </div>
+
+        <div class="bar">
+            <div class="fill" id="confidenceFill"></div>
+        </div>
+    </div>
+
+    <div class="stats">
+        <div class="stat">
+            <div class="stat-label">Sleep session</div>
+            <div class="stat-value" id="sleepTimer">00:00:00</div>
+        </div>
+
+        <div class="stat">
+            <div class="stat-label">Frames analyzed</div>
+            <div class="stat-value" id="frames">0</div>
+        </div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div class="settings">
+        <h3>Detection Settings</h3>
+
+        <div class="setting">
+            <div class="setting-title">
+                <span>Confidence threshold</span>
+                <span id="thresholdValue">80%</span>
+            </div>
+
+            <input type="range" id="threshold" min="50" max="99" value="80">
+
+            <div class="setting-note">
+                Higher values require the AI to be more certain before accepting a prediction.
+            </div>
+        </div>
+
+        <div class="setting">
+            <div class="setting-title">
+                <span>State stability</span>
+                <span id="stabilityValue">3 seconds</span>
+            </div>
+
+            <input type="range" id="stability" min="1" max="10" value="3">
+
+            <div class="setting-note">
+                A new state must remain consistent for this duration before being accepted.
+            </div>
+        </div>
+
+        <div class="setting">
+            <div class="setting-title">
+                <span>Alarm delay</span>
+                <span id="delayValue">15 seconds</span>
+            </div>
+
+            <input type="range" id="alarmDelay" min="0" max="120" step="5" value="15">
+
+            <div class="setting-note">
+                Delay after confirmed sleep detection before the alarm starts.
+            </div>
+        </div>
+
+        <div class="toggle-row">
+            <div>
+                <strong>Sleep alarm</strong>
+                <small>Play sound when sleep is detected</small>
+            </div>
+
+            <label class="toggle">
+                <input type="checkbox" id="alarmToggle" checked>
+            <span></span>
+            </label>
+        </div>
+
+        <button class="alarm-button" id="testAlarm" onclick="testAlarm()">
+            🔔 Test Alarm Sound
+        </button>
+    </div>
+
+</div>
+</div>
+
+<footer>
+    Sleep Monitor 2.0 · Teachable Machine · AI Vision
+</footer>
+
+</div>
+
+<script>
+const URL = "https://teachablemachine.withgoogle.com/models/tHzy5HgAx/";
+
+let model, webcam;
+let running = false;
+let loading = false;
+
+let currentState = "waiting";
+let candidateState = null;
+let candidateSince = 0;
+
+let sleepStart = null;
+let sleepSeconds = 0;
+let frameCount = 0;
+
+let alarmEnabled = true;
+let alarmActive = false;
+let alarmAudioContext = null;
+let alarmInterval = null;
+let alarmTimeout = null;
+
+let calibrationRunning = false;
+let calibrationDone = false;
+let calibrationStart = 0;
+let calibrationDuration = 5000;
+let awakeSamples = 0;
+let awakeConfidenceSum = 0;
+let calibratedAwakeConfidence = 0;
+
+let lastPrediction = null;
+
+const statusText = document.getElementById("statusText");
+const statusIcon = document.getElementById("statusIcon");
+const confidenceText = document.getElementById("confidenceText");
+const confidenceFill = document.getElementById("confidenceFill");
+const sleepTimer = document.getElementById("sleepTimer");
+const framesEl = document.getElementById("frames");
+
+const thresholdSlider = document.getElementById("threshold");
+const stabilitySlider = document.getElementById("stability");
+const delaySlider = document.getElementById("alarmDelay");
+const alarmToggle = document.getElementById("alarmToggle");
+
+// SETTINGS
+
+thresholdSlider.addEventListener("input", () => {
+    document.getElementById("thresholdValue").textContent =
+        thresholdSlider.value + "%";
+});
+
+stabilitySlider.addEventListener("input", () => {
+    document.getElementById("stabilityValue").textContent =
+        stabilitySlider.value + " seconds";
+});
+
+delaySlider.addEventListener("input", () => {
+    document.getElementById("delayValue").textContent =
+        delaySlider.value + " seconds";
+});
+
+alarmToggle.addEventListener("change", () => {
+    alarmEnabled = alarmToggle.checked;
+
+    if (!alarmEnabled) {
+        stopAlarm();
+    }
+});
+
+// START
+
+async function startMonitor() {
+    if (running || loading) return;
+
+    loading = true;
+
+    const btn = document.getElementById("startBtn");
+    btn.disabled = true;
+    btn.textContent = "Loading model...";
+
+    try {
+        model = await tmImage.load(URL + "model.json", URL + "metadata.json");
+
+        webcam = new tmImage.Webcam(320, 320, true);
+
+        await webcam.setup();
+        await webcam.play();
+
+        document.getElementById("webcam-container").innerHTML = "";
+        document.getElementById("webcam-container").appendChild(webcam.canvas);
+
+        document.getElementById("placeholder").classList.add("hidden");
+
+        document.getElementById("liveDot").classList.add("active");
+        document.getElementById("cameraDot").classList.add("active");
+
+        document.getElementById("liveText").textContent = "Live";
+        document.getElementById("cameraLabel").textContent = "Camera active";
+
+        running = true;
+        loading = false;
+
+        btn.disabled = false;
+        btn.textContent = "● Monitoring";
+
+        resetCalibration();
+        beginCalibration();
+
+        loop();
+
+    } catch (error) {
+        console.error(error);
+
+        running = false;
+        loading = false;
+
+        btn.disabled = false;
+        btn.textContent = "▶ Start Monitoring";
+
+        alert("Could not start camera or load AI model. Check camera permission and internet connection.");
+    }
+}
+
+// CALIBRATION
+
+function resetCalibration() {
+    calibrationRunning = false;
+    calibrationDone = false;
+    awakeSamples = 0;
+    awakeConfidenceSum = 0;
+    calibratedAwakeConfidence = 0;
+
+    document.getElementById("calibrationFill").style.width = "0%";
+    document.getElementById("calibrationPercent").textContent = "0%";
+    document.getElementById("calibrationStatus").textContent = "Not calibrated";
+}
+
+function beginCalibration() {
+    calibrationRunning = true;
+    calibrationStart = Date.now();
+
+    document.getElementById("calibrationStatus").textContent = "Calibrating...";
+    document.getElementById("calibrationText").textContent =
+        "Sit normally in front of the camera and stay awake during calibration.";
+}
+
+function updateCalibration(awakeProbability) {
+    if (!calibrationRunning) return;
+
+    const elapsed = Date.now() - calibrationStart;
+    const progress = Math.min(100, (elapsed / calibrationDuration) * 100);
+
+    document.getElementById("calibrationFill").style.width = progress + "%";
+    document.getElementById("calibrationPercent").textContent =
+        Math.round(progress) + "%";
+
+    // Collect awake confidence samples during calibration.
+    if (awakeProbability !== null && awakeProbability > 0) {
+        awakeConfidenceSum += awakeProbability;
+        awakeSamples++;
+    }
+
+    if (elapsed >= calibrationDuration) {
+        calibrationRunning = false;
+        calibrationDone = true;
+
+        calibratedAwakeConfidence = awakeSamples
+            ? awakeConfidenceSum / awakeSamples
+            : 0;
+
+        document.getElementById("calibrationStatus").textContent = "Complete";
+        document.getElementById("calibrationText").textContent =
+            "Calibration complete. Monitoring is active.";
+
+        document.getElementById("calibrationFill").style.width = "100%";
+        document.getElementById("calibrationPercent").textContent = "100%";
+    }
+}
+
+// LOOP
+
+async function loop() {
+    if (!running) return;
+
+    try {
+        webcam.update();
+        await predict();
+    } catch (error) {
+        console.error("Prediction error:", error);
+    }
+
+    if (running) {
+        requestAnimationFrame(loop);
+    }
+}
+
+// PREDICTION
+
+async function predict() {
+    const predictions = await model.predict(webcam.canvas);
+
+    frameCount++;
+    framesEl.textContent = frameCount;
+
+    lastPrediction = predictions;
+
+    renderClassProbabilities(predictions);
+
+    let sleepProbability = 0;
+    let awakeProbability = 0;
+
+    for (const p of predictions) {
+        const label = p.className.toLowerCase();
+
+        if (label.includes("sleep") || label.includes("sov")) {
+            sleepProbability = p.probability;
+        }
+
+        if (label.includes("awake") || label.includes("våken") || label.includes("vaken")) {
+            awakeProbability = p.probability;
+        }
+    }
+
+    const best = predictions.reduce((a, b) =>
+        a.probability > b.probability ? a : b
+    );
+
+    const threshold = Number(thresholdSlider.value) / 100;
+
+    confidenceText.textContent = Math.round(best.probability * 100) + "%";
+    confidenceFill.style.width = (best.probability * 100) + "%";
+
+    // Calibration collects awake probability but does not retrain the model.
+    updateCalibration(awakeProbability);
+
+    // Don't make decisions until calibration is complete.
+    if (!calibrationDone) {
+        setState("calibrating");
+        return;
+    }
+
+    let detected = "unknown";
+
+    if (sleepProbability >= threshold) {
+        detected = "sleeping";
+    } else if (awakeProbability >= threshold) {
+        detected = "awake";
+    }
+
+    // When confidence is too low, show Unknown.
+    if (detected === "unknown") {
+        candidateState = null;
+        candidateSince = 0;
+        setState("unknown");
+        return;
+    }
+
+    // Stabilization: require same candidate state over a time period.
+    if (candidateState !== detected) {
+        candidateState = detected;
+        candidateSince = Date.now();
+    }
+
+    const stableSeconds = Number(stabilitySlider.value);
+    const stableDuration = Date.now() - candidateSince;
+
+    if (stableDuration >= stableSeconds * 1000) {
+        setState(detected);
+    } else {
+        setState("checking");
+    }
+}
+
+// PROBABILITY DISPLAY
+
+function renderClassProbabilities(predictions) {
+    const container = document.getElementById("label-container");
+    container.innerHTML = "";
+
+    predictions.forEach(p => {
+        const percentage = Math.round(p.probability * 100);
+
+        const row = document.createElement("div");
+        row.className = "class-row";
+
+        const top = document.createElement("div");
+        top.className = "class-row-top";
+
+        const label = document.createElement("span");
+        label.textContent = p.className;
+
+        const value = document.createElement("span");
+        value.textContent = percentage + "%";
+
+        top.appendChild(label);
+        top.appendChild(value);
+
+        const bar = document.createElement("div");
+        bar.className = "class-bar";
+
+        const fill = document.createElement("div");
+        fill.className = "class-fill";
+        fill.style.width = percentage + "%";
+
+        if (p.probability > 0.8) {
+            fill.style.background = "#8b5cf6";
+        }
+
+        bar.appendChild(fill);
+        row.appendChild(top);
+        row.appendChild(bar);
+
+        container.appendChild(row);
+    });
+}
+
+// STATE
+
+function setState(state) {
+    if (state === currentState) return;
+
+    currentState = state;
+
+    switch (state) {
+        case "sleeping":
+            statusText.textContent = "Sleeping";
+            statusText.className = "status sleeping";
+            statusIcon.textContent = "😴";
+
+            if (!sleepStart) {
+                sleepStart = Date.now();
+            }
+
+            if (alarmEnabled) {
+                scheduleAlarm();
+            }
+            break;
+
+        case "awake":
+            statusText.textContent = "Awake";
+            statusText.className = "status awake";
+            statusIcon.textContent = "☀️";
+
+            sleepStart = null;
+            stopAlarm();
+            break;
+
+        case "unknown":
+            statusText.textContent = "Uncertain";
+            statusText.className = "status unknown";
+            statusIcon.textContent = "❔";
+
+            // Cancel pending alarm when detection is uncertain.
+            cancelPendingAlarm();
+            break;
+
+        case "checking":
+            statusText.textContent = "Checking...";
+            statusText.className = "status waiting";
+            statusIcon.textContent = "🔎";
+            break;
+
+        case "calibrating":
+            statusText.textContent = "Calibrating";
+            statusText.className = "status waiting";
+            statusIcon.textContent = "⚙️";
+            break;
+    }
+}
+
+// TIMER
+
+function updateTimer() {
+    if (sleepStart && currentState === "sleeping") {
+        sleepSeconds = Math.floor((Date.now() - sleepStart) / 1000);
+    } else {
+        sleepSeconds = 0;
+    }
+
+    const h = String(Math.floor(sleepSeconds / 3600)).padStart(2, "0");
+    const m = String(Math.floor((sleepSeconds % 3600) / 60)).padStart(2, "0");
+    const s = String(sleepSeconds % 60).padStart(2, "0");
+
+    sleepTimer.textContent = `${h}:${m}:${s}`;
+}
+
+setInterval(updateTimer, 1000);
+
+// ALARM
+
+function scheduleAlarm() {
+    if (!alarmEnabled || alarmActive || alarmTimeout) return;
+
+    const delay = Number(delaySlider.value) * 1000;
+
+    if (delay === 0) {
+        startAlarm();
+        return;
+    }
+
+    alarmTimeout = setTimeout(() => {
+        alarmTimeout = null;
+
+        if (running && currentState === "sleeping" && alarmEnabled) {
+            startAlarm();
+        }
+    }, delay);
+}
+
+function cancelPendingAlarm() {
+    if (alarmTimeout) {
+        clearTimeout(alarmTimeout);
+        alarmTimeout = null;
+    }
+}
+
+function startAlarm() {
+    if (alarmActive || !alarmEnabled) return;
+
+    alarmActive = true;
+
+    document.getElementById("testAlarm").textContent = "🔕 Stop Alarm";
+    document.getElementById("testAlarm").classList.add("active");
+
+    playAlarmSound();
+}
+
+function playAlarmSound() {
+    stopSoundLoop();
+
+    try {
+        alarmAudioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+        const ctx = alarmAudioContext;
+
+        function beep() {
+            if (!alarmActive || ctx.state === "closed") return;
+
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+
+            osc.type = "sine";
+            osc.frequency.value = 880;
+
+            gain.gain.setValueAtTime(0.0001, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.2, ctx.currentTime + 0.03);
+            gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.4);
+
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+
+            osc.start();
+            osc.stop(ctx.currentTime + 0.45);
+        }
+
+        beep();
+        alarmInterval = setInterval(beep, 900);
+
+    } catch (e) {
+        console.log("Could not play alarm:", e);
+    }
+}
+
+function stopSoundLoop() {
+    if (alarmInterval) {
+        clearInterval(alarmInterval);
+        alarmInterval = null;
+    }
+
+    if (alarmAudioContext) {
+        alarmAudioContext.close().catch(() => {});
+        alarmAudioContext = null;
+    }
+}
+
+function stopAlarm() {
+    alarmActive = false;
+    stopSoundLoop();
+
+    document.getElementById("testAlarm").textContent = "🔔 Test Alarm Sound";
+    document.getElementById("testAlarm").classList.remove("active");
+}
+
+function testAlarm() {
+    if (alarmActive) {
+        stopAlarm();
+        return;
+    }
+
+    startAlarm();
+}
+
+// STOP
+
+function stopMonitor() {
+    running = false;
+    loading = false;
+
+    cancelPendingAlarm();
+    stopAlarm();
+
+    if (webcam) {
+        try {
+            webcam.stop();
+        } catch (e) {}
+        webcam = null;
+    }
+
+    document.getElementById("webcam-container").innerHTML = "";
+    document.getElementById("placeholder").classList.remove("hidden");
+
+    document.getElementById("liveDot").classList.remove("active");
+    document.getElementById("cameraDot").classList.remove("active");
+
+    document.getElementById("liveText").textContent = "Offline";
+    document.getElementById("cameraLabel").textContent = "Camera inactive";
+
+    const btn = document.getElementById("startBtn");
+    btn.disabled = false;
+    btn.textContent = "▶ Start Monitoring";
+
+    currentState = "waiting";
+    candidateState = null;
+    candidateSince = 0;
+    sleepStart = null;
+
+    statusText.textContent = "Waiting...";
+    statusText.className = "status waiting";
+    statusIcon.textContent = "🌙";
+
+    confidenceText.textContent = "0%";
+    confidenceFill.style.width = "0%";
+
+    sleepTimer.textContent = "00:00:00";
+
+    resetCalibration();
+}
+</script>
+</body>
+</html>
